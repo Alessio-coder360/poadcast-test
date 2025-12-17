@@ -169,6 +169,22 @@ actions/setup-node@v4 → installa Node.js.
 actions/cache → salva cache per velocizzare build.
 
 
+uses: e la colonna “Featured Actions”
+
+uses: serve per usare un’azione già pronta dal Marketplace di GitHub Actions.
+La colonna destra non mostra tutte le azioni del mondo, solo alcune “featured”.
+Quindi è normale non vedere actions/setup-python@v4 lì. Esiste comunque e si usa così:
+
+
+
+Azioni molto usate:
+
+actions/checkout@v3 → fa il checkout del repo nella VM
+actions/setup-node@v4 → installa Node
+actions/setup-python@v4 → installa Python
+actions/cache@v4 → cache dipendenze
+
+
 
 Ubuntu è il server di GitHub?
 Non proprio.
@@ -238,6 +254,12 @@ macos-latest → Mac
 Perché è collegato a run?
 Perché i comandi che scrivi sotto run: devono essere compatibili con quel sistema (es. su Ubuntu usi comandi Linux).
 
+2) “VM” che vuol dire?
+VM = Virtual Machine (macchina virtuale).
+Quando parte un workflow, GitHub ti accende una macchina temporanea (Ubuntu/Windows/Mac) dove esegue i tuoi step.
+runs-on: ubuntu-latest = fai girare i comandi in Linux Ubuntu.
+Per questo i comandi run: sono comandi Linux (shell). Sono collegati.
+
 
 
 
@@ -248,6 +270,28 @@ Nei campi come runs-on → NO, devi usare valori supportati.
 Nei uses: → NO, devi usare il nome esatto dell’action dal Marketplace.
 
 
+
+
+Dove trovo le azioni (uses:)? Perché non vedo actions/setup-python@v4 nella colonna?”
+
+La colonna destra mostra solo qualche azione “in evidenza” (featured). Non è l’elenco completo.
+Le azioni ufficiali si trovano nel Marketplace:
+Vai su: https://github.com/marketplace?type=actions
+e cerca “setup python”.
+
+L’action che vuoi esiste ed è questa:
+
+Repo: https://github.com/actions/setup-python
+Nome per uses: actions/setup-python@v4
+
+
+Se in uses: scrivi actions/setup-python@v42 (o ti scappa un carattere), fallisce.
+Deve essere esattamente actions/setup-python@v4.
+
+
+
+
+
 ✅ A cosa serve name:?
 Solo per leggibilità.
 Appare nella UI di GitHub Actions per capire cosa fa ogni step.
@@ -255,3 +299,58 @@ Non influisce sul funzionamento.
 
 
 
+
+Perché vedi “pages build and deployment” dopo aver creato il workflow?
+
+Quello è un altro workflow automatico che GitHub abilita quando attivi GitHub Pages (Settings → Pages).
+Serve a buildare e pubblicare il sito statico del repo (ad es. da docs/ o gh-pages), non è collegato al tuo workflow “Generate Podcast Feeds”.
+
+
+Il tutorial che dice “finché la Pages build non è finita il file YAML non sarà pronto”: Probabilmente intende che se il tuo YAML/Actions dipende da artefatti generati dalla Pages build, allora ha senso aspettare che quella run finisca. Ma in generale il tuo workflow è indipendente: parte su push e non deve aspettare la Pages build, a meno che tu abbia messo dei vincoli (non li hai messi).
+
+Come capire se è legato o indipendente:
+Vai in Actions → Run details per ogni run. Se il tuo “Generate Podcast Feeds” non ha needs: verso pages-build-deployment, allora non aspetta.
+E dal tuo YAML non vedo needs:: quindi sono indipendenti.
+
+
+
+
+
+
+Permessi del workflow: cosa hai scelto e perché il tutorial consiglia diversamente
+Nel tuo secondo screenshot (Settings → Actions → General → Workflow permissions) vedo selezionato:
+
+“Read repository contents and packages permissions” (solo read).
+
+Se vuoi fare git push dentro al workflow, hai 2 strade:
+Strada A (consigliata): Dichiarare i permessi nel YAML
+Aggiungi in cima al file:
+
+
+
+permissions:
+  contents: write
+
+
+
+Questo eleva i permessi del GITHUB_TOKEN solo per quel workflow, anche se a livello repo è impostato “read-only”.
+Strada B: Cambiare i permessi a livello repo
+In Settings → Actions → General, metti “Read and write permissions”.
+Così tutti i workflow hanno write di default.
+Perché il tutorial consiglia diversamente?
+
+Alcuni tutorial preferiscono non aumentare i permessi globali del repo e usarli solo dove serve (Strada A, nel YAML).
+Altri, per semplicità, mettono write a livello repo (Strada B).
+
+Conclusione: Con la tua scelta (read-only globale) devi mettere permissions: contents: write nel YAML per poter pushare dal workflow.
+
+
+
+
+
+ Che errori aveva il tuo workflow
+Guardando lo screenshot del YAML:
+
+Indentazione e spazi: alcune righe mostravano -name: (senza spazio) → in YAML deve essere - name:.
+Permessi di push: senza permissions: contents: write il blocco “Push Repo” fallisce perché il token è read-only.
+Possibili errori di commit: se feed.py non modifica nulla, git commit fallisce
