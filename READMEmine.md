@@ -354,3 +354,6 @@ Guardando lo screenshot del YAML:
 Indentazione e spazi: alcune righe mostravano -name: (senza spazio) → in YAML deve essere - name:.
 Permessi di push: senza permissions: contents: write il blocco “Push Repo” fallisce perché il token è read-only.
 Possibili errori di commit: se feed.py non modifica nulla, git commit fallisce
+
+
+
