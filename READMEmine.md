@@ -438,4 +438,67 @@ Vuoi evitare conflitti e semplificare.
 
 
 
+Tutti i comandi in un unico file (copiabile)
+
+
+
+
+##############################################
+# METODO 1: Copia file dal branch tutorial (ignora storia)
+##############################################
+
+# 1) Assicurati di essere su main e allineato
+git checkout main
+git pull --rebase origin main
+
+# 2) Porta i riferimenti dal remote del tutorial
+git fetch upstream
+
+# 3) Crea un worktree temporaneo (cartella fuori dalla repo corrente)
+git worktree add ../tmp-01_04e upstream/01_04e
+
+# 4) Copia i file del tutorial nella tua repo (escludendo la cartella .git)
+rsync -av --progress ../tmp-01_04e/ ./ --exclude .git
+
+# 5) Porta in stage e committa
+git add -A
+git commit -m "Import files from tutorial branch 01_04e (copied, no history merge)"
+
+# 6) Push al tuo remoto
+git push
+
+# 7) Rimuovi il worktree temporaneo
+git worktree remove ../tmp-01_04e
+
+
+##############################################
+# METODO 2: Merge del branch tutorial (mantieni storia)
+##############################################
+
+# 1) Torna su main e allinea
+git checkout main
+git pull --rebase origin main
+
+# 2) Porta in locale il branch del tutorial
+git fetch upstream
+git checkout -b 01_04e upstream/01_04e
+
+# 3) Torna su main
+git checkout main
+
+# 4) Riallinea ancora main
+git pull --rebase origin main
+
+# 5) Prova il merge
+git merge 01_04e
+
+# 6) Se compare "fatal: refusing to merge unrelated histories"
+git merge 01_04e --allow-unrelated-histories
+
+# 7) Risolvi conflitti, poi:
+git add -A
+git commit -m "Merge tutorial 01_04e into main"
+
+# 8)# 8) Push finale
+
 
