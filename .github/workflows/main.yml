@@ -7,17 +7,16 @@ on:
 permissions:
   contents: write               # <-- serve per poter fare git push dal workflow
 
-
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repo      - name: Checkout Repo
+      - name: Checkout Repo
         uses: actions/checkout@v3
 
       - name: Run Feed Generator
         uses: Alessio-coder360/podcast-generator@main
         with:
-          name: ${{ github.actor }}
+          name: ${{ github.actor }}      # <-- il nome del committer passato all'action
 
       
