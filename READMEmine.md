@@ -357,3 +357,61 @@ Possibili errori di commit: se feed.py non modifica nulla, git commit fallisce
 
 
 
+CAMBIANTI WORKFLOW RISPETTO A PRIMA :
+
+1) Permissions: “Read-only” nelle Settings vs permissions: nel workflow
+
+
+Settings → Actions → Workflow permissions (a livello repo)
+
+Se è su “Read repository contents permission” = il token GITHUB_TOKEN ha SOLO lettura di default.
+Se è su “Read and write permissions” = il token ha scrittura di default.
+
+
+
+permissions: nel file workflow (a livello di singolo workflow)
+Esempio:
+
+
+permissions:
+  contents: write
+
+
+Questo sovrascrive (eleva) i permessi solo per quel workflow.
+➜ Quindi non è un conflitto: è più specifico e vince sui permessi globali solo durante quella run.
+
+
+Quando ti serve permissions: contents: write:
+
+Quando il tuo workflow deve fare git commit + git push al repo (es. aggiornare podcast.xml).
+Se non lo metti (e i permessi globali sono “read-only”), lo step di push fallirà.
+
+Check veloce:
+Se non vuoi toccare le Settings globali, metti sempre nel workflow:
+
+
+permissions:
+  contents: write
+
+
+2)  branches: [ main ] — cosa cambia rispetto al tuo on: [push]
+
+
+Tuo attuale:
+
+on: [push]
+
+
+Parte su ogni push in qualsiasi branch del repo. Se pusha un branch temporaneo, parte comunque.
+
+
+Con branches: [ main ]:
+
+
+on:
+  push:
+    branches: [ main ]
+
+
+
+
