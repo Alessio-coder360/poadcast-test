@@ -501,3 +501,84 @@ git commit -m "Merge tutorial 01_04e into main"
 # 8)# 8) Push finale
 
 
+
+
+
+IMPORTANTE NEL TUTORIAL ELIMINA NEL WORK FLOW DELLA REPO ( QUESTA ) MADRE , TUTTA QUESTA PARTE :
+
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyyaml
+
+      - name: Run Feed Generator
+        run: |
+          python feed.py
+          ls -la                  # debug: mostra i file in root
+
+      - name: Debug git status
+        run: |
+          git status
+          git diff --name-only    # debug: elenca i file modificati
+
+      - name: Verify podcast.xml at root
+        run: |
+          test -f podcast.xml || (echo "podcast.xml missing at root!"; exit 1)
+          head -n 20 podcast.xml || true
+
+      - name: Commit & Push podcast.xml
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add podcast.xml
+          git commit -m "Update podcast.xml" || echo "No changes to commit"
+
+
+PERCHE :
+
+Perché hanno eliminato “Setup Python / pip / feed.py / commit & push”
+In breve: perché quella logica è stata spostata dentro una Custom GitHub Action (la tua “Podcast Generator”) che gira in Docker.
+Se l’azione fa tutto in container, non serve più dichiarare nel workflow:
+
+actions/setup-python
+pip install pyyaml
+python feed.py
+…neppure i debug step duplicati
+
+
+Tu hai incollato un action.yml come questo:
+
+
+name: "Podcast Generator"
+author: "Alessio Cardone"
+description: "Generates a feed for a podcast"
+runs:
+  using: "docker"
+  image: "Dockerfile"
+branding:
+  icon: "git-branch"
+  color: "red"
+input:
+  email:
+    description: The committer's email address
+    required: true
+    default: ${{ github.actor }}@localhost
+  name:
+    description: The committer's name 
+    required: true 
+    default: ${{ github.actor }}
+``
+
+
+
+Tradotto: invece di “montare” Python e dipendenze nello YAML del workflow, usi un’azione che contiene già Python + dipendenze (Dockerfile). Il workflow diventa più corto; la complessità è dentro l’azione.
+
+Questo significa: la tua Action gira in Docker (definito dal Dockerfile) e lì dentro puoi avere Python, pyyaml e tutto quello che serve per generare podcast.xml.
+Quindi il workflow principale non ha più bisogno di Setup Python ecc.: userà questa AZIONE.
+
