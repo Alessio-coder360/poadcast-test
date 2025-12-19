@@ -1,6 +1,11 @@
 
 name: Generate Podcast Feeds
-on: [push]
+on:
+  push:
+    branches: [ main ]          # parte solo sui push a main (puoi ampliarlo)
+
+permissions:
+  contents: write               # <-- serve per poter fare git push dal workflow
 
 jobs:
   build:
@@ -20,14 +25,27 @@ jobs:
           pip install pyyaml
 
       - name: Run Feed Generator
-        run: python feed.py
+        run: |
+          python feed.py
+          ls -la                  # debug: mostra i file in root
 
-      - name: Push Repo
+      - name: Debug git status
+        run: |
+          git status
+          git diff --name-only    # debug: elenca i file modificati
+
+      - name: Verify podcast.xml at root
+        run: |
+          test -f podcast.xml || (echo "podcast.xml missing at root!"; exit 1)
+          head -n 20 podcast.xml || true
+
+      - name: Commit & Push podcast.xml
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
-          git add .
-          git commit -m "Modified Feed"
+          git add podcast.xml
+          git commit -m "Update podcast.xml" || echo "No changes to commit"
+
          
 
           
