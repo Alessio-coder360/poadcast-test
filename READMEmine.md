@@ -416,7 +416,6 @@ on:
 
 
 
-
 Quando serve mantenere la storia Git e perché
 
 Serve la storia se vuoi:
