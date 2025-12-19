@@ -415,3 +415,27 @@ on:
 
 
 
+
+
+Quando serve mantenere la storia Git e perché
+
+Serve la storia se vuoi:
+
+Conservare i commit originali (chi ha fatto cosa, quando).
+Fare debug o audit in futuro.
+
+
+Non serve la storia se:
+
+Ti interessa solo il contenuto (file), non i commit.
+Vuoi evitare conflitti e semplificare.
+
+
+
+➡ Per il tuo caso (tutorial → tuo progetto), non serve la storia. Basta copiare i file.
+
+
+
+
+
+
